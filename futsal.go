@@ -40,7 +40,7 @@ type TanggalSewa 	[NMAX]Tanggal
 
 var nTransaksi, nPenyewa, nLapangan int
 
-//data dummy
+//Data dummy penyewa 
 var daftarPenyewa = tabPenyewa{
     {1, "Nolan", "081234567890"},
     {2, "Kagura", "081345678901"},
@@ -50,6 +50,7 @@ var daftarPenyewa = tabPenyewa{
 	{6, "Hirara", "089521159807"},
 }
 
+//Data dummy lapangan
 var lapangan daftarLapangan = daftarLapangan{
 	//Lapangan A
     {1, "Lapangan_A", "25x15", "Sintetis", 200000, "08.00-10.00", "Tidak_Tersedia"},
@@ -63,7 +64,7 @@ var lapangan daftarLapangan = daftarLapangan{
     {7, "Lapangan_C", "30x25", "Semen", 150000, "19.00-21.00", "Tidak_Tersedia"},
 	//Lapangan D
     {8, "Lapangan_D", "24x14", "Sintetis", 180000, "10.00-12.00", "Tidak_Tersedia"},
-    {9, "Lapangan_D", "24x14", "Sintetis", 180000, "15.00-17.00", "Tersedia"},
+    {9, "Lapangan_D", "24x14", "Sintetis", 180000, "15.00-17.00", "Tidak_Tersedia"},
 	//Lapangan E
     {10, "Lapangan_E", "25x15", "Vinyl", 220000, "13.00-15.00", "Tersedia"},
     {11, "Lapangan_E", "25x15", "Vinyl", 220000, "15.00-17.00", "Tersedia"},
@@ -71,15 +72,17 @@ var lapangan daftarLapangan = daftarLapangan{
     {12, "Lapangan_F", "26x16", "Semen", 160000, "08.00-10.00", "Tidak_Tersedia"},
 }
 
+//Data dummy transaksi (menghubungkan antara data lapangan dengan data penyewa)
 var daftarTransaksi = tabTransaksi{
     {"Nolan", "081234567890", "Lapangan_A", Tanggal{1, 6, 2026}, "08.00-10.00"},
-    {"Kagura", "081345678901", "Lapangan_B", Tanggal{1, 6, 2026}, "10.00-12.00"},
+    {"Kagura", "081345678901", "Lapangan_B", Tanggal{1, 6, 2026}, "12.00-14.00"},
     {"Suyou", "082156789012", "Lapangan_C", Tanggal{2, 6, 2026}, "19.00-21.00"},
     {"Gusion", "085767890123", "Lapangan_D", Tanggal{2, 6, 2026}, "10.00-12.00"},
 	{"Aamon", "085782749283", "Lapangan_F", Tanggal{5, 6, 2026}, "08.00-10.00"},
 	{"Hirara", "085782749283", "Lapangan_D", Tanggal{5, 6, 2026}, "15.00-17.00"},
 }
 
+//Create data lapangan baru
 func tambahLapangan(L *daftarLapangan, n *int) {
 	if *n < NMAX {
 		var idLap int
@@ -118,6 +121,16 @@ func tambahLapangan(L *daftarLapangan, n *int) {
 	}
 }
 
+func isLapanganValid(namaCari string) bool{
+	for i := 0; i < nLapangan; i++ {
+		if lapangan[i].Nama == namaCari {
+			return true
+		}
+	}
+	return false
+}
+
+//Create data transaksi baru
 func tambahTransaksi(T *tabTransaksi, n *int) {
 	var ada bool
 	if *n < NMAX {
@@ -129,6 +142,12 @@ func tambahTransaksi(T *tabTransaksi, n *int) {
 		fmt.Scan(&tFj.NomorPenyewa)
 		fmt.Print("Masukkan Nama Lapangan: ")
 		fmt.Scan(&tFj.NamaLapangan)
+
+		if !isLapanganValid(tFj.NamaLapangan) {
+			fmt.Printf("❌ Error: %s tidak terdaftar di sistem!\n", tFj.NamaLapangan)
+            return
+		}
+
 		fmt.Print("Masukkan Tanggal Sewa (hari bulan tahun): ")
 		fmt.Scan(&tFj.TanggalSewa.Hari, &tFj.TanggalSewa.Bulan, &tFj.TanggalSewa.Tahun)
 		fmt.Print("Masukkan Jam Sewa (ex. 08.00-10.00): ")
@@ -182,7 +201,7 @@ func tambahTransaksi(T *tabTransaksi, n *int) {
 	}
 }
 
-//Print data ketersediaan lapangan
+//Print semua data lapangan yang ada
 func tampilLapangan(lapangan [NMAX]Lapangan, n int) {
 	fmt.Println("\n=====================================================================================================")
 	fmt.Println("||                                   DATA KETERSEDIAAN LAPANGAN FUTSAL                             ||")
@@ -208,6 +227,7 @@ func tampilLapangan(lapangan [NMAX]Lapangan, n int) {
 	fmt.Println("=====================================================================================================")
 }
 
+//Print data lapangan yang kosong / tersedia
 func tampilLapanganTersedia(L daftarLapangan, n int) {
 	fmt.Println("\n=====================================================================================================")
     fmt.Println("||                          DATA JADWAL LAPANGAN TERSEDIA (Belum Dibooking)                        ||")
@@ -225,7 +245,8 @@ func tampilLapanganTersedia(L daftarLapangan, n int) {
     fmt.Println("=====================================================================================================")
 }	
 
-func tampilDaftarPenyewa(T [NMAX]Penyewa, n int) {
+//Print data penyewa
+func tampilDaftarPenyewa(T [NMAX]Penyewa, nPenyewa int) {
     fmt.Println("\n=============================================")
     fmt.Println("||           DATA PENYEWA FUTSAL           ||")
     fmt.Println("=============================================")
@@ -235,10 +256,10 @@ func tampilDaftarPenyewa(T [NMAX]Penyewa, n int) {
 
     fmt.Println("---------------------------------------------")
 
-    if n == 0 {
+    if nPenyewa == 0 {
         fmt.Println("Belum ada data penyewa.")
     }else {
-		for i := 0; i < n; i++ {
+		for i := 0; i < nPenyewa; i++ {
         	fmt.Printf("| %-5d | %-15s | %-15s |\n",
             	T[i].ID,
             	T[i].nama,
@@ -248,6 +269,7 @@ func tampilDaftarPenyewa(T [NMAX]Penyewa, n int) {
     fmt.Println("=============================================")
 }
 
+//Print data transaksi
 func tampilDaftarTransaksi(T [NMAX]Transaksi, n int) {
 	fmt.Println("\n=====================================================================================")
 	fmt.Println("||                            DATA TRANSAKSI FUTSAL                                ||")
@@ -279,6 +301,7 @@ func tampilDaftarTransaksi(T [NMAX]Transaksi, n int) {
     fmt.Println("=====================================================================================")
 }
 
+//Interface aplikasi
 func menuUtama() {
 	fmt.Println("\n==================================================")
 	fmt.Println("||      APLIKASI PEMESANAN LAPANGAN FUTSAL      ||")
@@ -290,6 +313,7 @@ func menuUtama() {
 	fmt.Println("--------------------------------------------------")
 }
 
+//Interface menu lapangan
 func menuLapangan() {
 	fmt.Println("\n===============================================================")
 	fmt.Println("||                   MENU DATA LAPANGAN FUTSAL               ||")
@@ -306,9 +330,10 @@ func menuLapangan() {
 	fmt.Println("--------------------------------------------------------------")
 }
 
+//Interface menu penyewa
 func menuPenyewa() {
 	fmt.Println("\n==================================================")
-	fmt.Println("||        MENU DATA PENYEWA FUTSAL              ||")
+	fmt.Println("||         MENU DATA PENYEWA FUTSAL             ||")
 	fmt.Println("==================================================")
 	fmt.Println("✍️  1. Ubah Data Penyewa")
     fmt.Println("🗑️  2. Hapus Data Penyewa")
@@ -319,6 +344,7 @@ func menuPenyewa() {
 	fmt.Println("--------------------------------------------------")
 }
 
+//Interface menu transaksi
 func menuTransaksi() {
 	fmt.Println("\n==================================================")
 	fmt.Println("||        MENU DATA TRANSAKSI FUTSAL            ||")
@@ -332,6 +358,7 @@ func menuTransaksi() {
 	fmt.Println("--------------------------------------------------")
 }
 
+//Program utama
 func main() {
     var pilihUtama, pilihMenuLap, pilihMenuPeny, pilihMenuTransaksi int
 
@@ -444,6 +471,7 @@ func main() {
     }
 }
 
+//Update data transaksi
 func ubahTransaksi(T *tabTransaksi, n int) {
 	var namaCari string
 	var i int
@@ -507,6 +535,7 @@ func ubahTransaksi(T *tabTransaksi, n int) {
 	}
 }
 
+//Update data lapangan
 func ubahLapangan(L *daftarLapangan, n int) {
 	var idCari int
 	var i, idx int
@@ -553,6 +582,7 @@ func ubahLapangan(L *daftarLapangan, n int) {
 	}
 }
 
+//Update data penyewa
 func ubahPenyewa(T *tabPenyewa, n int) {
 	var idCari int
 	var i int
@@ -597,6 +627,7 @@ func ubahPenyewa(T *tabPenyewa, n int) {
 	}
 }
 
+//Delete data lapangan
 func hapusLapangan(L *daftarLapangan, n *int) {
 	var idCari int
 	var i int
@@ -624,6 +655,7 @@ func hapusLapangan(L *daftarLapangan, n *int) {
 	}
 }
 
+//Delete data transaksi
 func hapusTransaksi(T *tabTransaksi, n *int) {
 	var namaCari string
 	var i int
@@ -661,6 +693,7 @@ func hapusTransaksi(T *tabTransaksi, n *int) {
 	}
 }
 
+//Delete data penyewa
 func hapusPenyewa(T *tabPenyewa, n *int) {
 	var idCari int
 	var i int
@@ -688,7 +721,7 @@ func hapusPenyewa(T *tabPenyewa, n *int) {
 	}
 }
 
- // Selection Sort untuk mengurutkan lapangan berdasarkan harga
+ //Selection Sort untuk mengurutkan lapangan berdasarkan harga
 func urutkanLapanganByPrice(L *daftarLapangan, n int) {
     var i, j, idx int
     var temp Lapangan
@@ -712,7 +745,7 @@ func urutkanLapanganByPrice(L *daftarLapangan, n int) {
     fmt.Println("\n✅ Data lapangan berhasil diurutkan berdasarkan Harga.")
 }
 
-// Ambil jam mulai sebagai integer dari format "HH-HH"
+//Ambil jam mulai sebagai integer agar mudah di sortingnya
 func jamMulaiInt(jam string) int {
     var jamMulai int
 	fmt.Sscanf(jam, "%d", &jamMulai)
@@ -744,6 +777,7 @@ func urutkanJadwalByHour(L *daftarLapangan, n int) {
     fmt.Println("\n✅ Data jadwal berhasil diurutkan berdasarkan Jam Mulai.")
 }
 
+//Mencari data transaksi 
 func cariTransaksi(T [NMAX]Transaksi, n int) {
     var namaLapangan string
     var ditemukan bool = false
@@ -752,10 +786,14 @@ func cariTransaksi(T [NMAX]Transaksi, n int) {
     fmt.Print("Masukkan Nama Lapangan yang dicari: ")
     fmt.Scan(&namaLapangan)
 
-    fmt.Println("\n=== HASIL PENCARIAN TRANSAKSI ===")
-    fmt.Printf("%-15s | %-15s | %-12s | %-8s | %-12s | %-10s\n",
-        "Penyewa", "Lapangan", "Tanggal", "Jam Awal", "Jam Selesai", "Status")
-    fmt.Println("------------------------------------------------------------------------------------------")
+    fmt.Println("\n===================================================================")
+    fmt.Println("||                    HASIL PENCARIAN TRANSAKSI                  ||")
+    fmt.Println("===================================================================")
+    
+    // Header Tabel yang konsisten dengan kolom di bawah
+    fmt.Printf("| %-15s | %-15s | %-12s | %-12s |\n",
+        "Penyewa", "Lapangan", "Tanggal", "Jam Sewa")
+    fmt.Println("-------------------------------------------------------------------")
 
     // Perulangan dari awal sampai akhir
     for i := 0; i < n; i++ {
@@ -769,7 +807,7 @@ func cariTransaksi(T [NMAX]Transaksi, n int) {
                 T[i].TanggalSewa.Tahun)
 
             // Tampilkan baris yang cocok
-            fmt.Printf("%-15s | %-15s | %-12s | %-8s \n",
+            fmt.Printf("| %-15s | %-15s | %-12s | %-12s |\n",
                 T[i].NamaPenyewa,
                 T[i].NamaLapangan,
                 tanggal,
@@ -780,7 +818,7 @@ func cariTransaksi(T [NMAX]Transaksi, n int) {
     if !ditemukan {
         fmt.Println("❌ Tidak ada transaksi untuk lapangan tersebut.")
     }
-    fmt.Println("==========================================================================================")
+    fmt.Println("===================================================================")
 }
 
 //Mencari data penyewa melalui nomor telepon dengan Sequential Search
@@ -856,6 +894,7 @@ func cariPenyewaByNama(T tabPenyewa, n int) {
 	}
 }
 
+//Mencari data lapangan 
 func cariLapangan(L daftarLapangan, n int) {
 	var i int
 	var ketemu bool = false
@@ -968,11 +1007,11 @@ func statistikPerBulan(T tabTransaksi, nTransaksi int, L daftarLapangan, nLapang
                 idxMax = i
             }
         }
-        // Tampilan Tabel
 		cetakTabelStatistik(judul, totalPemasukan, count[idxMax].nama, max)
     }
 }
 
+//Cetak tabel statistik bulanan
 func cetakTabelStatistik(judul string, totalPemasukan int, lapanganFavorit string, jumlahFavorit int) {
 	fmt.Println("\n========================================================")
     fmt.Printf("|| %-50s ||\n", judul)
